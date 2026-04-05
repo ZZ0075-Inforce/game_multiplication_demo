@@ -146,6 +146,9 @@ git remote add origin https://github.com/zz0071/game_multiplication_demo.git
 git push -u origin main
 
 
+### 執行網址
+https://zz0071.github.io/game_multiplication_demo/
+
 
 📄 授權
 本專案為教學示範用途，程式碼部分採 MIT License，圖示與音效資源請自行確認授權條款。
