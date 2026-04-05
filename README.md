@@ -136,6 +136,17 @@ git push -u origin main
 
 部署後網址：https://你的帳號.github.io/game_multiplication_demo/
 
+
+-- echo "# game_multiplication_demo" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/zz0071/game_multiplication_demo.git
+git push -u origin main
+
+
+
 📄 授權
 本專案為教學示範用途，程式碼部分採 MIT License，圖示與音效資源請自行確認授權條款。
 
