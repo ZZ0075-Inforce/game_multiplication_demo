@@ -30,27 +30,30 @@ export class ResultScreen {
     });
 
     this._restartBtn.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('game:restart'));
+      document.dispatchEvent(new CustomEvent('nav:pet-home'));
     });
   }
 
   /**
    * 渲染成績統計畫面
-   * @param {object} session  - 已結束的 GameSession
-   * @param {object} record   - 由 buildScoreRecord 產生的 ScoreRecord
+   * @param {object} session      - 已結束的 GameSession
+   * @param {object} record       - 由 buildScoreRecord 產生的 ScoreRecord
+   * @param {object} sessionBonus - 結算獎勵 { coins, stars }
+   * @param {object} profile      - 玩家存檔 (用於顯示寵物等級)
    */
-  show(session, record) {
+  show(session, record, sessionBonus, profile) {
     this._record = record;
 
     this._renderStars(record.stars);
-    this._renderStats(record);
+    this._renderStats(record, sessionBonus, profile);
     this._renderWrongAnswers(session.questions);
   }
 
   // ── 星等 ──────────────────────────────────────────────────
   _renderStars(stars) {
     let html = '';
-    for (let i = 1; i <= 10; i++) {
+    const total = 10;
+    for (let i = 1; i <= total; i++) {
       html += i <= stars
         ? '<span class="star-filled">⭐</span>'
         : '<span class="star-empty">☆</span>';
@@ -59,15 +62,21 @@ export class ResultScreen {
   }
 
   // ── 統計數值 ───────────────────────────────────────────────
-  _renderStats(record) {
+  _renderStats(record, sessionBonus, profile) {
+    const pet = profile.pets[profile.selectedPetId];
+    
     this._statsEl.innerHTML = `
+      <div class="stat-item stat-item--highlight">
+        <span class="stat-label">獲得金幣</span>
+        <span class="stat-value">🪙 ${sessionBonus.coins}</span>
+      </div>
+      <div class="stat-item stat-item--highlight">
+        <span class="stat-label">寵物等級</span>
+        <span class="stat-value">Lv.${pet.level}</span>
+      </div>
       <div class="stat-item">
         <span class="stat-label">總分</span>
         <span class="stat-value stat-value--accent">${record.score}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">星等</span>
-        <span class="stat-value stat-value--accent">${record.stars} ⭐</span>
       </div>
       <div class="stat-item">
         <span class="stat-label">答對</span>
@@ -80,10 +89,6 @@ export class ResultScreen {
       <div class="stat-item">
         <span class="stat-label">完成時間</span>
         <span class="stat-value">${record.durationSec} 秒</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">玩家</span>
-        <span class="stat-value" style="font-size:1rem">${_esc(record.playerName)}</span>
       </div>
     `;
   }

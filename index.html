@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="./css/main.css">
   <link rel="stylesheet" href="./css/game.css">
   <link rel="stylesheet" href="./css/result.css">
+  <link rel="stylesheet" href="./css/pet.css">
 </head>
 <body>
 
@@ -68,6 +69,7 @@
       <div class="pause-modal">
         <h2 class="pause-title">⏸ 遊戲暫停</h2>
         <button id="btn-resume" class="btn btn--primary btn--large">▶ 繼續遊戲</button>
+        <button id="btn-view-pet-paused" class="btn btn--secondary btn--large" style="margin-top: 15px;">🐣 去看寵物</button>
       </div>
     </div>
   </div>
@@ -93,6 +95,96 @@
       <h2 class="leaderboard-title">🏆 排行榜 TOP 10</h2>
       <div id="leaderboard-table"></div>
       <button id="btn-back-home" class="btn btn--ghost">← 返回首頁</button>
+    </div>
+  </div>
+
+  <!-- ===== 寵物小屋 ===== -->
+  <div id="screen-pet-home" class="screen screen--hidden">
+    <div class="pet-home-container">
+      <header class="pet-home-header">
+        <div class="player-badges">
+          <span id="pet-home-player">玩家</span>
+          <span id="pet-home-coins">🪙 0</span>
+          <span id="pet-home-stars">⭐ 0</span>
+        </div>
+      </header>
+
+      <main class="pet-home-main">
+        <h2 class="pet-home-title">我的小怪獸</h2>
+
+        <div class="pet-stage">
+          <div id="pet-display-container" class="pet-display-container">
+            <div id="pet-character" class="pet-character" aria-label="目前寵物">🐣</div>
+            <!-- 時裝圖層 -->
+            <div id="pet-wear-hat" class="pet-wear-layer layer-hat"></div>
+            <div id="pet-wear-cloth" class="pet-wear-layer layer-cloth"></div>
+            <div id="pet-wear-acc" class="pet-wear-layer layer-acc"></div>
+          </div>
+          
+          <p id="pet-name" class="pet-name">麻糬獸</p>
+          <div class="pet-level-badge">Lv.<span id="pet-level">1</span></div>
+
+          <div class="exp-bar-wrap" aria-label="經驗值">
+            <div id="pet-exp-bar" class="exp-bar" style="width: 0%"></div>
+          </div>
+
+          <p id="pet-mood" class="pet-mood">今天心情：很開心</p>
+        </div>
+
+        <div class="pet-home-actions">
+          <button id="btn-resume-game-from-pet-home" class="btn btn--primary btn--large" style="display: none; background: #ff9800; border-color: #f57c00; color: white;">▶ 繼續剛才的遊戲</button>
+          <button id="btn-play-from-pet-home" class="btn btn--primary btn--large">🎮 開始答題</button>
+          <div class="sub-actions">
+            <button id="btn-open-shop" class="btn btn--secondary">🛍 商城</button>
+            <button id="btn-open-wardrobe" class="btn btn--secondary">🎀 衣櫃</button>
+          </div>
+          <button id="btn-open-leaderboard" class="btn btn--ghost">🏆 排行榜</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== 商城 ===== -->
+  <div id="screen-shop" class="screen screen--hidden">
+    <div class="shop-container">
+      <header class="shop-header">
+        <h2 class="shop-title">怪獸商城</h2>
+        <div id="shop-coins" class="shop-coins">🪙 0</div>
+      </header>
+      <div id="shop-tabs" class="shop-tabs">
+        <button class="tab-btn active" data-tab="pets">寵物蛋</button>
+        <button class="tab-btn" data-tab="items">漂亮衣服</button>
+      </div>
+      <div id="shop-list" class="shop-list"></div>
+      <footer class="shop-footer">
+        <button id="btn-back-pet-home-from-shop" class="btn btn--ghost">← 返回小屋</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===== 衣櫃 ===== -->
+  <div id="screen-wardrobe" class="screen screen--hidden">
+    <div class="wardrobe-container">
+      <header class="wardrobe-header">
+        <h2 class="wardrobe-title">幫怪獸換衣服</h2>
+      </header>
+      
+      <div class="wardrobe-main">
+        <div class="wardrobe-preview-box">
+          <div id="wardrobe-preview-pet" class="pet-display-container">
+             <div id="wardrobe-char" class="pet-character">🐣</div>
+             <div id="wardrobe-wear-hat" class="pet-wear-layer layer-hat"></div>
+             <div id="wardrobe-wear-cloth" class="pet-wear-layer layer-cloth"></div>
+             <div id="wardrobe-wear-acc" class="pet-wear-layer layer-acc"></div>
+          </div>
+        </div>
+        
+        <div id="wardrobe-list" class="wardrobe-list"></div>
+      </div>
+
+      <footer class="wardrobe-footer">
+        <button id="btn-back-pet-home-from-wardrobe" class="btn btn--ghost">← 返回小屋</button>
+      </footer>
     </div>
   </div>
 

@@ -1,0 +1,256 @@
+/* css/pet.css */
+
+/* 容器與背景 */
+.pet-home-container, .shop-container, .wardrobe-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-sizing: border-box;
+  background-color: #fff9e6; /* 溫暖的淺黃色背景 */
+}
+
+/* 頂部資訊列 */
+.pet-home-header, .shop-header, .wardrobe-header {
+  padding: 10px 0;
+  border-bottom: 3px solid #ffd11a;
+  margin-bottom: 20px;
+}
+
+.player-badges {
+  display: flex;
+  gap: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* 寵物展示區域 */
+.pet-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.pet-display-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 0 #ffd11a;
+  border: 4px solid #ffd11a;
+}
+
+.pet-character {
+  z-index: 1;
+}
+
+/* 時裝圖層 */
+.pet-wear-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-size: 40px;
+}
+
+.layer-hat {
+  transform: translate(0, -50px);
+  z-index: 5;
+}
+
+.layer-cloth {
+  transform: translate(0, 30px);
+  z-index: 0;
+}
+
+.layer-acc {
+  transform: translate(40px, 10px);
+  z-index: 10;
+  font-size: 30px;
+}
+
+/* 資訊文字 */
+.pet-name {
+  font-size: 2rem;
+  margin: 10px 0;
+  color: #5c4d00;
+}
+
+.pet-level-badge {
+  background: #ff4d4d;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.exp-bar-wrap {
+  width: 80%;
+  height: 20px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 2px solid #ddd;
+}
+
+.exp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  transition: width 0.5s ease-out;
+}
+
+.pet-mood {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* 按鈕群組 */
+.pet-home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.sub-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.sub-actions .btn {
+  flex: 1;
+}
+
+/* 商城樣式 */
+.shop-coins {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #d4af37;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.shop-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: #ddd;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: #ffd11a;
+  color: #5c4d00;
+}
+
+.shop-list {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  padding: 5px;
+}
+
+.shop-item {
+  background: white;
+  border-radius: 15px;
+  padding: 15px;
+  text-align: center;
+  border: 3px solid #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s;
+}
+
+.shop-item:active {
+  transform: scale(0.95);
+}
+
+.shop-item.owned {
+  opacity: 0.6;
+}
+
+.item-emoji {
+  font-size: 40px;
+}
+
+.item-name {
+  font-weight: bold;
+}
+
+.item-price {
+  color: #e6b800;
+  font-weight: bold;
+}
+
+/* 衣櫃樣式 */
+.wardrobe-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wardrobe-preview-box {
+  padding: 20px;
+  background: #fff;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  border: 3px dashed #ffd11a;
+}
+
+.wardrobe-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.wardrobe-item {
+  aspect-ratio: 1;
+  background: white;
+  border: 3px solid #eee;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.wardrobe-item.equipped {
+  border-color: #4caf50;
+  background: #e8f5e9;
+}

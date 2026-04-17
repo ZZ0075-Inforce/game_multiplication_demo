@@ -40,6 +40,14 @@ export class GameScreen {
       container.querySelector('#pause-overlay'),
       container.querySelector('#btn-resume'),
     );
+    this._pauseOverlay.onResume = () => this._onResume();
+
+    this._viewPetBtn = container.querySelector('#btn-view-pet-paused');
+    if (this._viewPetBtn) {
+      this._viewPetBtn.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('nav:pet-home-paused'));
+      });
+    }
 
     this._session     = null;
     this._timer       = null;
@@ -48,7 +56,6 @@ export class GameScreen {
     this._answering   = false; // 防止重複點擊
 
     this._pauseBtn.addEventListener('click', () => this._onPause());
-    this._pauseOverlay.onResume = () => this._onResume();
   }
 
   /**
@@ -148,6 +155,13 @@ export class GameScreen {
     // 動畫 + 音效
     if (result === 'correct') {
       AudioManager.play('correct');
+      // 派發獎勵事件
+      document.dispatchEvent(new CustomEvent('game:reward-earned', {
+        detail: {
+          correct: true,
+          combo: this._session.combo ?? 0,
+        }
+      }));
       await playCorrect(this._enemyEl);
     } else {
       AudioManager.play('wrong');
