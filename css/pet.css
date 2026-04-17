@@ -25,6 +25,47 @@
   gap: 15px;
   font-size: 1.2rem;
   font-weight: bold;
+  align-items: center;
+}
+
+/* 雲端同步按鈕 */
+.btn-sync-status {
+  background: white;
+  border: 2px solid #ffd11a;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 0 #ffd11a;
+  font-family: inherit;
+  font-weight: bold;
+  color: #5c4d00;
+}
+
+.btn-sync-status:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.btn-sync-status.synced {
+  background: #e8f5e9;
+  border-color: #4caf50;
+  color: #2e7d32;
+  box-shadow: 0 2px 0 #4caf50;
+}
+
+.btn-sync-status.syncing {
+  animation: sync-pulse 1s infinite;
+  opacity: 0.7;
+}
+
+@keyframes sync-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
 }
 
 /* 寵物展示區域 */

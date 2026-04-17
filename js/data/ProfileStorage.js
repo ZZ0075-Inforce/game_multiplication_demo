@@ -87,6 +87,20 @@ export function patchProfile(updater) {
 }
 
 /**
+ * 取得完整的原始存檔物件 (供雲端同步使用)
+ */
+export function getProfileRaw() {
+  return loadProfile();
+}
+
+/**
+ * 完整替換目前的存檔 (供雲端同步覆蓋使用)
+ */
+export function replaceProfile(newProfile) {
+  return saveProfile(newProfile);
+}
+
+/**
  * 重設玩家存檔 (家長功能)
  */
 export function resetProfile() {

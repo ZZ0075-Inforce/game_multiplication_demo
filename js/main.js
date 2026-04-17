@@ -13,9 +13,10 @@ import { WardrobeScreen } from './ui/WardrobeScreen.js';
 
 import { buildScoreRecord } from './game/Scoring.js';
 import { saveToLeaderboard } from './data/Storage.js';
-import { loadProfile, saveProfile, patchProfile } from './data/ProfileStorage.js';
+import { loadProfile, saveProfile, patchProfile, replaceProfile } from './data/ProfileStorage.js';
 import { getAnswerReward, getSessionBonus } from './game/Rewards.js';
 import { applyPetExp } from './game/Progression.js';
+import { initCloudSync, login, isAuthorized, sync, uploadSave } from './data/CloudSync.js';
 
 // ---------- 畫面元素 ----------
 const screens = {
@@ -51,7 +52,7 @@ let leaderboardScreen = null;
 let profile = loadProfile();
 
 // ---------- 初始化 ----------
-function init() {
+async function init() {
   homeScreen = new HomeScreen(document.getElementById('screen-home'));
   petHomeScreen = new PetHomeScreen(document.getElementById('screen-pet-home'));
   gameScreen = new GameScreen(document.getElementById('screen-game'));
@@ -62,6 +63,9 @@ function init() {
 
   registerEvents();
 
+  // 初始化雲端同步 (但不自動強制登入)
+  initCloudSync();
+
   // 如果已經有玩家名稱，直接進小屋，否則進首頁命名
   if (profile.playerName && profile.playerName !== '玩家') {
     petHomeScreen.render(profile);
@@ -71,8 +75,51 @@ function init() {
   }
 }
 
+/**
+ * 封裝存檔更新，加入雲端自動同步
+ */
+function updateProfile(updater) {
+  profile = patchProfile(updater);
+  // 如果已連線雲端，則在背景上傳
+  if (isAuthorized()) {
+    uploadSave(profile).catch(err => console.error('Auto-upload failed:', err));
+  }
+  return profile;
+}
+
 // ---------- 事件監聽 ----------
 function registerEvents() {
+  // 0. 雲端同步事件
+  document.addEventListener('cloud:sync-requested', async () => {
+    if (!isAuthorized()) {
+      login();
+    } else {
+      await handleCloudSync();
+    }
+  });
+
+  document.addEventListener('cloud:authorized', async () => {
+    await handleCloudSync();
+  });
+
+  async function handleCloudSync() {
+    try {
+      petHomeScreen.setSyncStatus('syncing');
+      const result = await sync(profile);
+      
+      if (result.status === 'cloud_to_local') {
+        profile = replaceProfile(result.updatedProfile);
+        petHomeScreen.render(profile);
+        alert('已從雲端載入最新的寵物進度！✨');
+      }
+      
+      petHomeScreen.setSyncStatus('synced');
+    } catch (err) {
+      console.error('Cloud sync error:', err);
+      petHomeScreen.setSyncStatus('error');
+    }
+  }
+
   // 1. 導覽事件
   document.addEventListener('nav:home', () => {
     if (profile.playerName && profile.playerName !== '玩家') {
@@ -96,7 +143,7 @@ function registerEvents() {
 
   document.addEventListener('game:start', (e) => {
     const { playerName } = e.detail;
-    profile = patchProfile(draft => {
+    profile = updateProfile(draft => {
       draft.playerName = playerName || draft.playerName;
       return draft;
     });
@@ -137,7 +184,7 @@ function registerEvents() {
   // 2. 遊戲中即時獎勵
   document.addEventListener('game:reward-earned', (e) => {
     const reward = getAnswerReward(e.detail);
-    profile = patchProfile(draft => {
+    profile = updateProfile(draft => {
       draft.coins += reward.coins;
       draft.stars += reward.stars;
       draft.totalCorrect += 1;
@@ -158,7 +205,7 @@ function registerEvents() {
 
     const sessionBonus = getSessionBonus({ score: record.score });
 
-    profile = patchProfile(draft => {
+    profile = updateProfile(draft => {
       draft.bestScore = Math.max(draft.bestScore, record.score);
       draft.coins += sessionBonus.coins;
       draft.stars += sessionBonus.stars;
@@ -181,7 +228,7 @@ function registerEvents() {
   // 4. 商城與衣櫃互動
   document.addEventListener('shop:buy', (e) => {
     const { item } = e.detail;
-    profile = patchProfile(draft => {
+    profile = updateProfile(draft => {
       draft.coins -= item.price;
       if (item.id.startsWith('pet_')) {
         draft.ownedPets.push(item.id);
@@ -196,7 +243,7 @@ function registerEvents() {
 
   document.addEventListener('wardrobe:equip', (e) => {
     const { type, id } = e.detail;
-    profile = patchProfile(draft => {
+    profile = updateProfile(draft => {
       if (type === 'pet') {
         draft.selectedPetId = id;
       } else {

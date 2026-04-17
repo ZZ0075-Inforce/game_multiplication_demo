@@ -15,11 +15,14 @@ export class PetHomeScreen {
     this._expBarEl = container.querySelector('#pet-exp-bar');
     this._playBtn = container.querySelector('#btn-play-from-pet-home');
     this._resumeBtn = container.querySelector('#btn-resume-game-from-pet-home');
+    this._syncBtn = container.querySelector('#btn-cloud-sync');
 
     // 綁定按鈕事件
     this._playBtn.addEventListener('click', () => document.dispatchEvent(new CustomEvent('nav:play')));
 
     this._resumeBtn.addEventListener('click', () => document.dispatchEvent(new CustomEvent('nav:resume-game')));
+
+    this._syncBtn.addEventListener('click', () => document.dispatchEvent(new CustomEvent('cloud:sync-requested')));
 
     container.querySelector('#btn-open-shop')
       .addEventListener('click', () => document.dispatchEvent(new CustomEvent('nav:shop')));
@@ -38,6 +41,32 @@ export class PetHomeScreen {
   setResumeState(hasPausedGame) {
     if (this._resumeBtn) this._resumeBtn.style.display = hasPausedGame ? 'block' : 'none';
     if (this._playBtn) this._playBtn.style.display = hasPausedGame ? 'none' : 'block';
+  }
+
+  /**
+   * 更新雲端同步按鈕狀態
+   * @param {'idle'|'syncing'|'synced'|'error'} status 
+   */
+  setSyncStatus(status) {
+    if (!this._syncBtn) return;
+    
+    this._syncBtn.classList.remove('syncing', 'synced');
+    
+    switch (status) {
+      case 'syncing':
+        this._syncBtn.textContent = '☁️ 同步中...';
+        this._syncBtn.classList.add('syncing');
+        break;
+      case 'synced':
+        this._syncBtn.textContent = '☁️ 已同步';
+        this._syncBtn.classList.add('synced');
+        break;
+      case 'error':
+        this._syncBtn.textContent = '☁️ 同步失敗';
+        break;
+      default:
+        this._syncBtn.textContent = '☁️ 雲端同步';
+    }
   }
 
   /**
