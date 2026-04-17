@@ -17,6 +17,8 @@ import { loadProfile, saveProfile, patchProfile, replaceProfile } from './data/P
 import { getAnswerReward, getSessionBonus } from './game/Rewards.js';
 import { applyPetExp } from './game/Progression.js';
 import { initCloudSync, login, isAuthorized, sync, uploadSave } from './data/CloudSync.js';
+import { ITEMS } from './shop/Catalog.js';
+import { AudioManager } from './audio/AudioManager.js';
 
 // ---------- 畫面元素 ----------
 const screens = {
@@ -66,6 +68,9 @@ async function init() {
   // 初始化雲端同步 (但不自動強制登入)
   initCloudSync();
 
+  // 檢查每日獎勵
+  checkDailyReward();
+
   // 如果已經有玩家名稱，直接進小屋，否則進首頁命名
   if (profile.playerName && profile.playerName !== '玩家') {
     petHomeScreen.render(profile);
@@ -73,6 +78,55 @@ async function init() {
   } else {
     showScreen('home');
   }
+}
+
+/**
+ * 檢查是否為新的一天登入，並彈出獎勵視窗
+ */
+function checkDailyReward() {
+  const today = new Date().toISOString().split('T')[0];
+  if (profile.lastLoginDate === today) return;
+
+  // 篩選玩家尚未擁有的服飾
+  const unowned = ITEMS.filter(item => !profile.ownedItems.includes(item.id));
+  const modal = document.getElementById('modal-daily-reward');
+  const container = document.getElementById('daily-reward-options');
+  
+  if (unowned.length === 0) {
+    // 若全都有了，給金幣
+    profile = updateProfile(draft => {
+      draft.coins += 50;
+      draft.lastLoginDate = today;
+      return draft;
+    });
+    return;
+  }
+
+  // 隨機挑選 3 件 (或更少)
+  const choices = unowned.sort(() => 0.5 - Math.random()).slice(0, 3);
+  
+  container.innerHTML = '';
+  choices.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'reward-option-card';
+    card.innerHTML = `
+      <div class="reward-emoji">${item.emoji}</div>
+      <div class="reward-name">${item.name}</div>
+    `;
+    card.addEventListener('click', () => {
+      profile = updateProfile(draft => {
+        draft.ownedItems.push(item.id);
+        draft.lastLoginDate = today;
+        return draft;
+      });
+      modal.classList.add('modal-overlay--hidden');
+      petHomeScreen.render(profile);
+      alert(`領取成功！獲得了 ${item.name} ✨`);
+    });
+    container.appendChild(card);
+  });
+
+  modal.classList.remove('modal-overlay--hidden');
 }
 
 /**
@@ -89,6 +143,15 @@ function updateProfile(updater) {
 
 // ---------- 事件監聽 ----------
 function registerEvents() {
+  // -1. 改名事件
+  document.addEventListener('profile:rename', (e) => {
+    profile = updateProfile(draft => {
+      draft.playerName = e.detail.name;
+      return draft;
+    });
+    petHomeScreen.render(profile);
+  });
+
   // 0. 雲端同步事件
   document.addEventListener('cloud:sync-requested', async () => {
     if (!isAuthorized()) {
@@ -254,6 +317,19 @@ function registerEvents() {
       return draft;
     });
     wardrobeScreen.render(profile);
+  });
+
+  document.addEventListener('wardrobe:offset', (e) => {
+    const { type, x, y } = e.detail;
+    profile = updateProfile(draft => {
+      if (!draft.equippedOffsets) {
+        draft.equippedOffsets = {
+          hat: { x: 0, y: -50 }, cloth: { x: 0, y: 30 }, accessory: { x: 40, y: 10 }
+        };
+      }
+      draft.equippedOffsets[type] = { x, y };
+      return draft;
+    });
   });
 }
 

@@ -24,6 +24,9 @@ export class PetHomeScreen {
 
     this._syncBtn.addEventListener('click', () => document.dispatchEvent(new CustomEvent('cloud:sync-requested')));
 
+    container.querySelector('#btn-edit-name')
+      .addEventListener('click', () => this._handleRename());
+
     container.querySelector('#btn-open-shop')
       .addEventListener('click', () => document.dispatchEvent(new CustomEvent('nav:shop')));
 
@@ -32,6 +35,15 @@ export class PetHomeScreen {
 
     container.querySelector('#btn-open-leaderboard')
       .addEventListener('click', () => document.dispatchEvent(new CustomEvent('nav:leaderboard')));
+  }
+
+  _handleRename() {
+    const newName = prompt('請輸入新的名字：', this._playerEl.textContent);
+    if (newName && newName.trim() !== '') {
+      document.dispatchEvent(new CustomEvent('profile:rename', {
+        detail: { name: newName.trim() }
+      }));
+    }
   }
 
   /**
@@ -111,18 +123,25 @@ export class PetHomeScreen {
 
     if (charEl) charEl.textContent = petBase.emoji;
 
+    const offsets = profile.equippedOffsets || {
+      hat: { x: 0, y: -50 }, cloth: { x: 0, y: 30 }, accessory: { x: 40, y: 10 }
+    };
+
     // 清空並更新時裝
     if (hatEl) {
       const item = profile.equipped.hatId ? findItemById(profile.equipped.hatId) : null;
       hatEl.textContent = item ? item.emoji : '';
+      if (item) hatEl.style.transform = `translate(${offsets.hat.x}px, ${offsets.hat.y}px)`;
     }
     if (clothEl) {
       const item = profile.equipped.clothId ? findItemById(profile.equipped.clothId) : null;
       clothEl.textContent = item ? item.emoji : '';
+      if (item) clothEl.style.transform = `translate(${offsets.cloth.x}px, ${offsets.cloth.y}px)`;
     }
     if (accEl) {
       const item = profile.equipped.accessoryId ? findItemById(profile.equipped.accessoryId) : null;
       accEl.textContent = item ? item.emoji : '';
+      if (item) accEl.style.transform = `translate(${offsets.accessory.x}px, ${offsets.accessory.y}px)`;
     }
   }
 }

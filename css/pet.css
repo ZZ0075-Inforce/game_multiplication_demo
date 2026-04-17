@@ -28,6 +28,107 @@
   align-items: center;
 }
 
+/* 玩家資訊 */
+.player-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-edit-small {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.btn-edit-small:hover {
+  opacity: 1;
+}
+
+/* Modal 通用樣式 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+
+.modal-overlay--hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #fff9e6;
+  border: 4px solid #ffd11a;
+  border-radius: 30px;
+  padding: 30px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 0 #ffd11a;
+}
+
+.modal-title {
+  color: #ff9800;
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.modal-desc {
+  font-size: 1.1rem;
+  color: #5c4d00;
+  margin-bottom: 25px;
+}
+
+/* 每日獎勵特有樣式 */
+.reward-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.reward-option-card {
+  background: white;
+  border: 3px solid #eee;
+  border-radius: 20px;
+  padding: 15px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.reward-option-card:hover {
+  transform: scale(1.05);
+  border-color: #ff9800;
+}
+
+.reward-emoji {
+  font-size: 40px;
+}
+
+.reward-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.modal-hint {
+  font-size: 0.9rem;
+  color: #999;
+}
+
 /* 雲端同步按鈕 */
 .btn-sync-status {
   background: white;
@@ -109,6 +210,18 @@
   justify-content: center;
   pointer-events: none;
   font-size: 40px;
+  user-select: none;
+}
+
+/* 讓衣櫃裡的預覽裝飾可以被拖曳 */
+.wardrobe-preview-box .pet-wear-layer {
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+
+.wardrobe-preview-box .pet-wear-layer.dragging {
+  cursor: grabbing;
 }
 
 .layer-hat {

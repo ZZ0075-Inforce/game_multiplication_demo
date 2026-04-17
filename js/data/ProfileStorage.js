@@ -18,6 +18,11 @@ const DEFAULT_PROFILE = {
     clothId: null,
     accessoryId: null,
   },
+  equippedOffsets: {
+    hat: { x: 0, y: -50 },
+    cloth: { x: 0, y: 30 },
+    accessory: { x: 40, y: 10 }
+  },
   pets: {
     pet_mochi: {
       level: 1,
@@ -26,6 +31,7 @@ const DEFAULT_PROFILE = {
     },
   },
   history: [],
+  lastLoginDate: null,
   updatedAt: null,
 };
 
@@ -46,6 +52,10 @@ export function loadProfile() {
       equipped: {
         ...DEFAULT_PROFILE.equipped,
         ...(parsed.equipped || {}),
+      },
+      equippedOffsets: {
+        ...DEFAULT_PROFILE.equippedOffsets,
+        ...(parsed.equippedOffsets || {}),
       },
       pets: {
         ...DEFAULT_PROFILE.pets,
