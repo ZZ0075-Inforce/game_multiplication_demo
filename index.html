@@ -105,7 +105,10 @@
     <div class="pet-home-container">
       <header class="pet-home-header">
         <div class="player-badges">
-          <span id="pet-home-player">玩家</span>
+          <span class="player-name-wrap">
+            <span id="pet-home-player">玩家</span>
+            <button id="btn-edit-name" class="btn-edit-small" title="改名字">✏️</button>
+          </span>
           <span id="pet-home-coins">🪙 0</span>
           <span id="pet-home-stars">⭐ 0</span>
           <button id="btn-cloud-sync" class="btn-sync-status" title="雲端同步">☁️ 未同步</button>
@@ -188,6 +191,16 @@
       <footer class="wardrobe-footer">
         <button id="btn-back-pet-home-from-wardrobe" class="btn btn--ghost">← 返回小屋</button>
       </footer>
+    </div>
+  </div>
+
+  <!-- ===== 每日獎勵 Modal ===== -->
+  <div id="modal-daily-reward" class="modal-overlay modal-overlay--hidden">
+    <div class="modal-content daily-reward-content">
+      <h2 class="modal-title">✨ 每日登入驚喜 ✨</h2>
+      <p class="modal-desc">又是新的一天！挑一件漂亮的衣服吧：</p>
+      <div id="daily-reward-options" class="reward-options-grid"></div>
+      <p class="modal-hint">點選喜歡的禮物直接領取喔！</p>
     </div>
   </div>
 
