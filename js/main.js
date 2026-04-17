@@ -13,6 +13,7 @@ import { WardrobeScreen } from './ui/WardrobeScreen.js';
 
 import { buildScoreRecord } from './game/Scoring.js';
 import { saveToLeaderboard } from './data/Storage.js';
+import { uploadScore } from './data/LeaderboardAPI.js';
 import { loadProfile, saveProfile, patchProfile, replaceProfile } from './data/ProfileStorage.js';
 import { getAnswerReward, getSessionBonus } from './game/Rewards.js';
 import { applyPetExp } from './game/Progression.js';
@@ -264,7 +265,8 @@ function registerEvents() {
     petHomeScreen.setResumeState(false);
     const { session, totalPausedMs } = e.detail;
     const record = buildScoreRecord(session, totalPausedMs);
-    saveToLeaderboard(record);
+    saveToLeaderboard(record); // 保留本地備份
+    uploadScore(record);       // 上傳至 Firebase 全域排行榜
 
     const sessionBonus = getSessionBonus({ score: record.score });
 
