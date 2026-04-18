@@ -206,6 +206,7 @@ function registerEvents() {
   });
 
   document.addEventListener('game:start', (e) => {
+    AudioManager.init();
     const { playerName } = e.detail;
     profile = updateProfile(draft => {
       draft.playerName = playerName || draft.playerName;
@@ -312,9 +313,19 @@ function registerEvents() {
       if (type === 'pet') {
         draft.selectedPetId = id;
       } else {
-        const key = type === 'hat' ? 'hatId' : type === 'cloth' ? 'clothId' : 'accessoryId';
-        // 如果已經裝備了同一個，就卸下
-        draft.equipped[key] = draft.equipped[key] === id ? null : id;
+        if (!draft.equippedList) {
+          draft.equippedList = [];
+          if (draft.equipped.hatId) draft.equippedList.push(draft.equipped.hatId);
+          if (draft.equipped.clothId) draft.equippedList.push(draft.equipped.clothId);
+          if (draft.equipped.accessoryId) draft.equippedList.push(draft.equipped.accessoryId);
+        }
+        
+        const idx = draft.equippedList.indexOf(id);
+        if (idx > -1) {
+          draft.equippedList.splice(idx, 1); // 卸下
+        } else {
+          draft.equippedList.push(id); // 裝備 (允許多個)
+        }
       }
       return draft;
     });
@@ -322,17 +333,45 @@ function registerEvents() {
   });
 
   document.addEventListener('wardrobe:offset', (e) => {
-    const { type, x, y } = e.detail;
+    const { id, x, y } = e.detail;
     profile = updateProfile(draft => {
-      if (!draft.equippedOffsets) {
-        draft.equippedOffsets = {
-          hat: { x: 0, y: -50 }, cloth: { x: 0, y: 30 }, accessory: { x: 40, y: 10 }
-        };
-      }
-      draft.equippedOffsets[type] = { x, y };
+      if (!draft.equippedOffsets) draft.equippedOffsets = {};
+      draft.equippedOffsets[id] = { x, y };
       return draft;
     });
   });
+
+  // 設定按鈕邏輯
+  const btnSettings = document.getElementById('btn-settings');
+  const modalSettings = document.getElementById('modal-settings');
+  const btnToggleBgm = document.getElementById('btn-toggle-bgm');
+  const btnToggleSfx = document.getElementById('btn-toggle-sfx');
+  const btnCloseSettings = document.getElementById('btn-close-settings');
+
+  if (btnSettings) {
+    btnSettings.addEventListener('click', () => {
+      btnToggleBgm.textContent = `🎵 背景音樂：${AudioManager.settings.bgm ? '開' : '關'}`;
+      btnToggleSfx.textContent = `🔊 音效：${AudioManager.settings.sfx ? '開' : '關'}`;
+      modalSettings.classList.remove('modal-overlay--hidden');
+    });
+  }
+  if (btnToggleBgm) {
+    btnToggleBgm.addEventListener('click', () => {
+      AudioManager.toggleBgm();
+      btnToggleBgm.textContent = `🎵 背景音樂：${AudioManager.settings.bgm ? '開' : '關'}`;
+    });
+  }
+  if (btnToggleSfx) {
+    btnToggleSfx.addEventListener('click', () => {
+      AudioManager.toggleSfx();
+      btnToggleSfx.textContent = `🔊 音效：${AudioManager.settings.sfx ? '開' : '關'}`;
+    });
+  }
+  if (btnCloseSettings) {
+    btnCloseSettings.addEventListener('click', () => {
+      modalSettings.classList.add('modal-overlay--hidden');
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);

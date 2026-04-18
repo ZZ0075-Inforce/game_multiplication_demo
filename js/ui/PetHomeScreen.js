@@ -116,32 +116,33 @@ export class PetHomeScreen {
     const petId = profile.selectedPetId;
     const petBase = findItemById(petId);
     
-    const charEl = container.querySelector('.pet-character');
-    const hatEl = container.querySelector('.layer-hat');
-    const clothEl = container.querySelector('.layer-cloth');
-    const accEl = container.querySelector('.layer-acc');
+    // 清空並只保留寵物本體
+    container.innerHTML = `<div class="pet-character">${petBase.emoji}</div>`;
 
-    if (charEl) charEl.textContent = petBase.emoji;
+    const offsets = profile.equippedOffsets || {};
 
-    const offsets = profile.equippedOffsets || {
-      hat: { x: 0, y: -50 }, cloth: { x: 0, y: 30 }, accessory: { x: 40, y: 10 }
-    };
+    // 相容舊資料，若沒有 equippedList 則自動轉換
+    const equippedList = profile.equippedList || [];
+    if (profile.equipped && equippedList.length === 0) {
+      if (profile.equipped.hatId) equippedList.push(profile.equipped.hatId);
+      if (profile.equipped.clothId) equippedList.push(profile.equipped.clothId);
+      if (profile.equipped.accessoryId) equippedList.push(profile.equipped.accessoryId);
+    }
 
-    // 清空並更新時裝
-    if (hatEl) {
-      const item = profile.equipped.hatId ? findItemById(profile.equipped.hatId) : null;
-      hatEl.textContent = item ? item.emoji : '';
-      if (item) hatEl.style.transform = `translate(${offsets.hat.x}px, ${offsets.hat.y}px)`;
-    }
-    if (clothEl) {
-      const item = profile.equipped.clothId ? findItemById(profile.equipped.clothId) : null;
-      clothEl.textContent = item ? item.emoji : '';
-      if (item) clothEl.style.transform = `translate(${offsets.cloth.x}px, ${offsets.cloth.y}px)`;
-    }
-    if (accEl) {
-      const item = profile.equipped.accessoryId ? findItemById(profile.equipped.accessoryId) : null;
-      accEl.textContent = item ? item.emoji : '';
-      if (item) accEl.style.transform = `translate(${offsets.accessory.x}px, ${offsets.accessory.y}px)`;
-    }
+    // 渲染所有已裝備的物品
+    equippedList.forEach(itemId => {
+      const item = findItemById(itemId);
+      if (!item) return;
+      
+      const layer = document.createElement('div');
+      layer.className = 'pet-wear-layer';
+      layer.dataset.id = itemId;
+      layer.textContent = item.emoji;
+      
+      const off = offsets[itemId] || { x: 0, y: 0 };
+      layer.style.transform = `translate(${off.x}px, ${off.y}px)`;
+      
+      container.appendChild(layer);
+    });
   }
 }

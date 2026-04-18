@@ -1,8 +1,6 @@
 /**
- * AudioManager.js — 音效管理模組（T023）
- * 管理 5 種音效與背景音樂循環播放
- * 必須在使用者首次互動後呼叫 init()（瀏覽器 Autoplay Policy 限制）
- * @module AudioManager
+ * AudioManager.js — 音效管理模組
+ * 具備網頁合成音效 (Web Audio API) Fallback 功能，確保無音檔時也有聲音！
  */
 
 const AUDIO_FILES = {
@@ -13,80 +11,119 @@ const AUDIO_FILES = {
   gameOver:   './assets/audio/game-over.mp3',
 };
 
-/** @type {Map<string, HTMLAudioElement>} */
 const _sounds = new Map();
 let _initialized = false;
-let _bgmEnabled  = true;
+let _settings = JSON.parse(localStorage.getItem('monster-audio-settings') || '{"bgm":true,"sfx":true}');
+
+let audioCtx = null;
+let bgmInterval = null;
 
 export const AudioManager = {
-  /**
-   * 預載所有音效（需在使用者互動後呼叫，否則瀏覽器可能封鎖）
-   * 重複呼叫安全（僅初始化一次）
-   */
+  get settings() { return _settings; },
+  
+  saveSettings() {
+    localStorage.setItem('monster-audio-settings', JSON.stringify(_settings));
+    if (!_settings.bgm) this.stop('bgm');
+    else if (_initialized && _settings.bgm) this.play('bgm');
+  },
+
+  toggleBgm() {
+    _settings.bgm = !_settings.bgm;
+    this.saveSettings();
+  },
+  
+  toggleSfx() {
+    _settings.sfx = !_settings.sfx;
+    this.saveSettings();
+  },
+
   init() {
     if (_initialized) return;
     _initialized = true;
 
+    try {
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContext();
+    } catch(e) {}
+
     for (const [name, src] of Object.entries(AUDIO_FILES)) {
       const audio = new Audio(src);
       if (name === 'bgm') {
-        audio.loop   = true;
+        audio.loop = true;
         audio.volume = 0.3;
       } else {
         audio.volume = 0.6;
       }
-      // 預載（不強制，避免行動裝置不必要流量）
       audio.preload = 'auto';
       _sounds.set(name, audio);
     }
+    
+    if (_settings.bgm) this.play('bgm');
   },
 
-  /**
-   * 播放指定音效
-   * @param {'bgm'|'correct'|'wrong'|'stageClear'|'gameOver'} name
-   */
+  playSynth(type, freq, duration, vol=0.1) {
+    if (!audioCtx || audioCtx.state === 'suspended') return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  },
+
+  startSynthBGM() {
+    if (bgmInterval) return;
+    // 簡單的 8-bit 風格琶音 BGM
+    const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63]; // C4, E4, G4, C5, G4, E4
+    let idx = 0;
+    bgmInterval = setInterval(() => {
+      if(!_settings.bgm) return;
+      this.playSynth('triangle', notes[idx], 0.2, 0.05);
+      idx = (idx + 1) % notes.length;
+    }, 250);
+  },
+
   play(name) {
     if (!_initialized) return;
-    if (name === 'bgm' && !_bgmEnabled) return;
+    if (name === 'bgm' && !_settings.bgm) return;
+    if (name !== 'bgm' && !_settings.sfx) return;
+
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
 
     const audio = _sounds.get(name);
     if (!audio) return;
 
-    // 非循環音效：從頭播放（防止快速重複時音效卡住）
     if (name !== 'bgm') {
       audio.currentTime = 0;
     }
 
     audio.play().catch(() => {
-      // 靜默忽略 NotAllowedError（使用者尚未互動）
+      // 檔案不存在或被擋時，使用 Web Audio API 的合成音效作為 Fallback
+      if (name === 'bgm') {
+        this.startSynthBGM();
+      } else if (name === 'correct') {
+        this.playSynth('sine', 880, 0.1, 0.2); // 答對: 高音
+        setTimeout(() => this.playSynth('sine', 1108.73, 0.2, 0.2), 100);
+      } else if (name === 'wrong') {
+        this.playSynth('sawtooth', 150, 0.3, 0.2); // 答錯: 低沉聲
+      }
     });
   },
 
-  /**
-   * 停止指定音效
-   * @param {'bgm'|'correct'|'wrong'|'stageClear'|'gameOver'} name
-   */
   stop(name) {
+    if (name === 'bgm') {
+      clearInterval(bgmInterval);
+      bgmInterval = null;
+    }
     const audio = _sounds.get(name);
     if (!audio) return;
     audio.pause();
     audio.currentTime = 0;
-  },
-
-  /**
-   * 切換背景音樂開關
-   * @returns {boolean} 切換後的 bgm 狀態（true = 開）
-   */
-  toggleBgm() {
-    _bgmEnabled = !_bgmEnabled;
-    const bgm = _sounds.get('bgm');
-    if (bgm) {
-      if (_bgmEnabled) {
-        bgm.play().catch(() => {});
-      } else {
-        bgm.pause();
-      }
-    }
-    return _bgmEnabled;
-  },
+  }
 };

@@ -112,6 +112,7 @@
           <span id="pet-home-coins">🪙 0</span>
           <span id="pet-home-stars">⭐ 0</span>
           <button id="btn-cloud-sync" class="btn-sync-status" title="雲端同步">☁️ 未同步</button>
+          <button id="btn-settings" class="btn-edit-small" style="margin-left:auto; font-size: 1.5rem;" title="設定">⚙️</button>
         </div>
       </header>
 
@@ -201,6 +202,19 @@
       <p class="modal-desc">又是新的一天！挑一件漂亮的衣服吧：</p>
       <div id="daily-reward-options" class="reward-options-grid"></div>
       <p class="modal-hint">點選喜歡的禮物直接領取喔！</p>
+    </div>
+  </div>
+
+  <!-- ===== 設定 Modal ===== -->
+  <div id="modal-settings" class="modal-overlay modal-overlay--hidden">
+    <div class="modal-content">
+      <h2 class="modal-title">⚙️ 遊戲設定</h2>
+      <div style="display:flex; flex-direction:column; gap:15px; margin: 20px 0;">
+        <button id="btn-toggle-bgm" class="btn btn--secondary">🎵 背景音樂：開</button>
+        <button id="btn-toggle-sfx" class="btn btn--secondary">🔊 音效：開</button>
+      </div>
+      <p style="color:#999; font-size:0.9rem;">版本: v1.1.0</p>
+      <button id="btn-close-settings" class="btn btn--primary" style="margin-top:15px;">確定</button>
     </div>
   </div>
 

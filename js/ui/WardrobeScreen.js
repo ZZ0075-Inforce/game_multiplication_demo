@@ -11,72 +11,56 @@ export class WardrobeScreen {
     container.querySelector('#btn-back-pet-home-from-wardrobe')
       .addEventListener('click', () => document.dispatchEvent(new CustomEvent('nav:pet-home')));
 
-    // 初始化拖曳功能
-    this._initDrag(container.querySelector('.layer-hat'), 'hat');
-    this._initDrag(container.querySelector('.layer-cloth'), 'cloth');
-    this._initDrag(container.querySelector('.layer-acc'), 'accessory');
+    // 拖曳初始化移至 refreshList 內部動態綁定
   }
 
-  _initDrag(el, type) {
-    if (!el) return;
-    
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-    let initialOffsetX = 0;
-    let initialOffsetY = 0;
+  _initAllDrags() {
+    const layers = this._previewEl.querySelectorAll('.pet-wear-layer');
+    layers.forEach(el => {
+      const itemId = el.dataset.id;
+      if (!itemId) return;
 
-    const onPointerDown = (e) => {
-      // 只有在該部位有裝備時才能拖曳
-      const key = type === 'hat' ? 'hatId' : type === 'cloth' ? 'clothId' : 'accessoryId';
-      if (!this._profile || !this._profile.equipped[key]) return;
-      
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      
-      const offsets = this._profile.equippedOffsets || {
-        hat: { x: 0, y: -50 }, cloth: { x: 0, y: 30 }, accessory: { x: 40, y: 10 }
+      let isDragging = false;
+      let startX = 0, startY = 0;
+      let initialX = 0, initialY = 0;
+
+      el.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        const offsets = this._profile.equippedOffsets || {};
+        initialX = offsets[itemId] ? offsets[itemId].x : 0;
+        initialY = offsets[itemId] ? offsets[itemId].y : 0;
+        
+        el.setPointerCapture(e.pointerId);
+        el.classList.add('dragging');
+        e.preventDefault();
+      });
+
+      el.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        el.style.transform = `translate(${initialX + dx}px, ${initialY + dy}px)`;
+      });
+
+      const onUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        el.releasePointerCapture(e.pointerId);
+        el.classList.remove('dragging');
+        
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        document.dispatchEvent(new CustomEvent('wardrobe:offset', {
+          detail: { id: itemId, x: initialX + dx, y: initialY + dy }
+        }));
       };
-      
-      initialOffsetX = offsets[type].x;
-      initialOffsetY = offsets[type].y;
-      
-      el.setPointerCapture(e.pointerId);
-      el.classList.add('dragging');
-      // 防止預設行為 (例如捲動)
-      e.preventDefault();
-    };
 
-    const onPointerMove = (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      const newX = initialOffsetX + dx;
-      const newY = initialOffsetY + dy;
-      el.style.transform = `translate(${newX}px, ${newY}px)`;
-    };
-
-    const onPointerUp = (e) => {
-      if (!isDragging) return;
-      isDragging = false;
-      el.releasePointerCapture(e.pointerId);
-      el.classList.remove('dragging');
-      
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      const newX = initialOffsetX + dx;
-      const newY = initialOffsetY + dy;
-      
-      document.dispatchEvent(new CustomEvent('wardrobe:offset', {
-        detail: { type, x: newX, y: newY }
-      }));
-    };
-
-    el.addEventListener('pointerdown', onPointerDown);
-    el.addEventListener('pointermove', onPointerMove);
-    el.addEventListener('pointerup', onPointerUp);
-    el.addEventListener('pointercancel', onPointerUp);
+      el.addEventListener('pointerup', onUp);
+      el.addEventListener('pointercancel', onUp);
+    });
   }
 
   /**
@@ -94,6 +78,8 @@ export class WardrobeScreen {
    */
   refreshList() {
     this._listEl.innerHTML = '';
+    
+    const equippedList = this._profile.equippedList || [];
 
     // 1. 先列出寵物 (更換底座)
     this._profile.ownedPets.forEach(petId => {
@@ -105,9 +91,12 @@ export class WardrobeScreen {
     // 2. 再列出所有擁有的道具
     this._profile.ownedItems.forEach(itemId => {
       const item = findItemById(itemId);
-      const isEquipped = Object.values(this._profile.equipped).includes(itemId);
+      const isEquipped = equippedList.includes(itemId) || Object.values(this._profile.equipped || {}).includes(itemId);
       this._addItemToGrid(item, isEquipped, () => this._handleEquip(item.type, itemId));
     });
+
+    // 重新綁定拖曳
+    this._initAllDrags();
   }
 
   _addItemToGrid(item, active, onClick) {
