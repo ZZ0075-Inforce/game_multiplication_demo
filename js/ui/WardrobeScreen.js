@@ -5,7 +5,7 @@ export class WardrobeScreen {
   constructor(container, petHomeScreen) {
     this._el = container;
     this._petHomeScreen = petHomeScreen; // 複用其更新邏輯
-    this._previewEl = container.querySelector('.wardrobe-preview-box');
+    this._previewEl = container.querySelector('.pet-display-container');
     this._listEl = container.querySelector('#wardrobe-list');
 
     container.querySelector('#btn-back-pet-home-from-wardrobe')
