@@ -104,7 +104,8 @@ export class PetHomeScreen {
     this._expBarEl.style.width = `${progress}%`;
 
     // 更新寵物外觀展示
-    this.updatePetDisplay(this._el, profile);
+    const displayContainer = this._el.querySelector('.pet-display-container');
+    this.updatePetDisplay(displayContainer, profile);
   }
 
   /**
@@ -138,6 +139,12 @@ export class PetHomeScreen {
       layer.className = 'pet-wear-layer';
       layer.dataset.id = itemId;
       layer.textContent = item.emoji;
+      
+      let zIndex = 5;
+      if (item.type === 'cloth') zIndex = 2; // 怪獸上方，帽子下方
+      if (item.type === 'hat') zIndex = 5;
+      if (item.type === 'accessory') zIndex = 10;
+      layer.style.zIndex = zIndex;
       
       const off = offsets[itemId] || { x: 0, y: 0 };
       layer.style.transform = `translate(${off.x}px, ${off.y}px)`;

@@ -4,11 +4,11 @@
  */
 
 const AUDIO_FILES = {
-  bgm:        './assets/audio/bgm.mp3',
-  correct:    './assets/audio/correct.mp3',
-  wrong:      './assets/audio/wrong.mp3',
-  stageClear: './assets/audio/stage-clear.mp3',
-  gameOver:   './assets/audio/game-over.mp3',
+  bgm:        './assets/audio/bgm-custom.mp3',
+  correct:    './assets/audio/correct-custom.mp3',
+  wrong:      './assets/audio/wrong-custom.mp3',
+  stageClear: './assets/audio/stage-clear-custom.mp3',
+  gameOver:   './assets/audio/game-over-custom.mp3',
 };
 
 const _sounds = new Map();
